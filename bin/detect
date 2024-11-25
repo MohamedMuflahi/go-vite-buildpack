@@ -1,8 +1,12 @@
 #!/bin/bash
-if [ -f "go.mod" ]; then
+
+if [ -f "go.mod" ] && [ -d "web" ]; then
+  echo "Go App with Web Directory Detected"
+  exit 0
+elif [ -f "go.mod" ]; then
   echo "Go App Detected"
   exit 0
 else
-  echo "Not a Go App"
+  echo "Not a Go App or Web Directory Missing"
   exit 1
 fi
