@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ -f "go.mod" ]; then
+  echo "Go App Detected"
+  exit 0
+else
+  echo "Not a Go App"
+  exit 1
+fi

@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Directories provided by Heroku
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+
+echo "-----> Installing Go"
+GO_VERSION="1.21.0"
+GO_TAR="go${GO_VERSION}.linux-amd64.tar.gz"
+GO_URL="https://golang.org/dl/${GO_TAR}"
+
+# Download and install Go
+curl -sL ${GO_URL} -o /tmp/${GO_TAR}
+tar -C /tmp -xzf /tmp/${GO_TAR}
+mv /tmp/go $BUILD_DIR/.go
+
+# Add Go to PATH
+export PATH=$BUILD_DIR/.go/bin:$PATH
+
+echo "-----> Setting up Go modules"
+cd $BUILD_DIR
+export GOPATH=$BUILD_DIR/.go
+export PATH=$GOPATH/bin:$PATH
+
+# Restore dependencies and build the app
+go mod tidy
+go build -o $BUILD_DIR/bin/app .
+
+echo "-----> Build complete. The binary is in $BUILD_DIR/bin/app"
