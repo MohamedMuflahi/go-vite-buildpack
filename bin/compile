@@ -1,17 +1,9 @@
 #!/bin/bash
 
+# Directories provided by Heroku
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-
-echo "-----> Installing Node.js and Yarn"
-NODE_VERSION="18.x"
-YARN_VERSION="stable"
-
-curl -sL https://deb.nodesource.com/setup_$NODE_VERSION | bash -
-apt-get install -y nodejs
-
-npm install -g yarn@$YARN_VERSION
 
 echo "-----> Running yarn install and yarn build in the web/ directory"
 WEB_DIR="$BUILD_DIR/web"
@@ -19,9 +11,11 @@ WEB_DIR="$BUILD_DIR/web"
 if [ -d "$WEB_DIR" ]; then
   cd $WEB_DIR
 
+  # Install dependencies
   echo "------> Installing dependencies in $WEB_DIR"
   yarn install
 
+  # Build the web assets
   echo "------> Building the web assets in $WEB_DIR"
   yarn build
 
@@ -30,23 +24,21 @@ else
   echo "No web/ directory found, skipping Yarn commands"
 fi
 
-echo "-----> Installing Go"
+echo "-----> Setting up Go environment"
 GO_VERSION="1.21.0"
 GO_TAR="go${GO_VERSION}.linux-amd64.tar.gz"
 GO_URL="https://golang.org/dl/${GO_TAR}"
 
+# Download and install Go
 curl -sL ${GO_URL} -o /tmp/${GO_TAR}
 tar -C /tmp -xzf /tmp/${GO_TAR}
 mv /tmp/go $BUILD_DIR/.go
 
+# Add Go to PATH
 export PATH=$BUILD_DIR/.go/bin:$PATH
 
-echo "-----> Setting up Go modules"
+echo "-----> Building Go application"
 cd $BUILD_DIR
-export GOPATH=$BUILD_DIR/.go
-export PATH=$GOPATH/bin:$PATH
-
-echo "-----> Running Go build"
 go mod tidy
 go build -o $BUILD_DIR/bin/app .
 
