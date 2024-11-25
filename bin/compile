@@ -5,7 +5,25 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
 
-# cd .. 
+echo "-----> Running yarn install and yarn build in the web/ directory"
+WEB_DIR="$BUILD_DIR/web"
+
+if [ -d "$WEB_DIR" ]; then
+  cd $WEB_DIR
+
+  # Install dependencies
+  echo "------> Installing dependencies in $WEB_DIR"
+  yarn install
+
+  # Build the web assets
+  echo "------> Building the web assets in $WEB_DIR"
+  yarn build
+
+  cd $BUILD_DIR
+else
+  echo "No web/ directory found, skipping Yarn commands"
+fi
+
 echo "-----> Setting up Go environment"
 GO_VERSION="1.21.0"
 GO_TAR="go${GO_VERSION}.linux-amd64.tar.gz"
@@ -19,9 +37,8 @@ mv /tmp/go $BUILD_DIR/.go
 # Add Go to PATH
 export PATH=$BUILD_DIR/.go/bin:$PATH
 
-
-echo "-----> Building Go application in root directory"
-cd $BUILD_DIR/..
+echo "-----> Building Go application"
+cd $BUILD_DIR
 go mod tidy
 go build -o $BUILD_DIR/bin/app .
 
