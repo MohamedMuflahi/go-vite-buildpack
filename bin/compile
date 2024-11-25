@@ -5,24 +5,8 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
 
-echo "-----> Running yarn install and yarn build in the web/ directory"
-WEB_DIR="$BUILD_DIR/web"
-
-if [ -d "$WEB_DIR" ]; then
-  cd $WEB_DIR
-
-  # Install dependencies
-  echo "------> Installing dependencies in $WEB_DIR"
-  yarn install
-
-  # Build the web assets
-  echo "------> Building the web assets in $WEB_DIR"
-  yarn build
-
-  cd $BUILD_DIR
-else
-  echo "No web/ directory found, skipping Yarn commands"
-fi
+# cd .. 
+buildpack_dir=$(cd "$(dirname "$1")"; cd ..; pwd)
 
 echo "-----> Setting up Go environment"
 GO_VERSION="1.21.0"
@@ -32,14 +16,14 @@ GO_URL="https://golang.org/dl/${GO_TAR}"
 # Download and install Go
 curl -sL ${GO_URL} -o /tmp/${GO_TAR}
 tar -C /tmp -xzf /tmp/${GO_TAR}
-mv /tmp/go $BUILD_DIR/.go
+mv /tmp/go $buildpack_dir/.go
 
 # Add Go to PATH
-export PATH=$BUILD_DIR/.go/bin:$PATH
+export PATH=$buildpack_dir/.go/bin:$PATH
 
-echo "-----> Building Go application"
-cd $BUILD_DIR
+echo "-----> Building Go application in root directory"
+cd $buildpack_dir
 go mod tidy
-go build -o $BUILD_DIR/bin/app .
+go build -o $buildpack_dir/bin/app .
 
-echo "-----> Build complete. The binary is in $BUILD_DIR/bin/app"
+echo "-----> Build complete. The binary is in $buildpack_dir/bin/app"
